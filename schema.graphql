@@ -1,0 +1,81 @@
+type Token @entity {
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+  totalSupply: BigInt!
+  owner: Bytes!
+  paused: Boolean!
+  deprecated: Boolean
+  upgradedAddress: Bytes
+  basisPointsRate: Int!
+  maximumFee: BigInt!
+  issuanceCount: BigInt!
+  redeemCount: BigInt!
+  blacklistedCount: BigInt!
+}
+
+type Account @entity {
+  id: ID!
+  address: Bytes!
+  balance: BigInt!
+  isBlacklisted: Boolean!
+  transfersSent: [Transfer!]! @derivedFrom(field: "from")
+  transfersReceived: [Transfer!]! @derivedFrom(field: "to")
+  approvals: [Approval!]! @derivedFrom(field: "owner")
+}
+
+type Transfer @entity {
+  id: ID!
+  from: Account!
+  to: Account!
+  value: BigInt!
+  fee: BigInt
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: Bytes!
+}
+
+type Approval @entity {
+  id: ID!
+  owner: Account!
+  spender: Account!
+  value: BigInt!
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: Bytes!
+}
+
+type BlacklistAction @entity {
+  id: ID!
+  user: Account!
+  actionType: String! # "ADD" or "REMOVE"
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenIssuance @entity {
+  id: ID!
+  amount: BigInt!
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenRedemption @entity {
+  id: ID!
+  amount: BigInt!
+  timestamp: BigInt!
+  block: BigInt!
+  transactionHash: Bytes!
+}
+
+type DailyMetric @entity {
+  id: ID! # The timestamp representing the day
+  totalTransfers: BigInt!
+  totalTransferValue: BigInt!
+  totalFees: BigInt!
+  activeAccounts: BigInt!
+  date: String!
+}
