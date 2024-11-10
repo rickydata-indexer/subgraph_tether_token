@@ -1,93 +1,132 @@
-type Issue @entity(immutable: true) {
-  id: Bytes!
-  amount: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
+type Token @entity {
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+  totalSupply: BigInt!
+  owner: Bytes!
+  paused: Boolean!
+  deprecated: Boolean
+  upgradedAddress: Bytes
+  basisPointsRate: Int!
+  maximumFee: BigInt!
+  issuanceCount: BigInt!
+  redeemCount: BigInt!
+  blacklistedCount: BigInt!
+  paramChangeCount: BigInt!
+  feeHistory: [ParamChange!]! @derivedFrom(field: "token")
+}
+
+type Account @entity {
+  id: ID!
+  address: Bytes!
+  balance: BigInt!
+  isBlacklisted: Boolean!
+  firstTransactionTimestamp: BigInt!
+  lastTransactionTimestamp: BigInt!
+  transferCount: BigInt!
+  receivedCount: BigInt!
+  totalTransferred: BigInt!
+  totalReceived: BigInt!
+  totalFeesPaid: BigInt!
+  dailyMetrics: [UserDailyMetric!]! @derivedFrom(field: "user")
+  transfersSent: [Transfer!]! @derivedFrom(field: "from")
+  transfersReceived: [Transfer!]! @derivedFrom(field: "to")
+  approvals: [Approval!]! @derivedFrom(field: "owner")
+}
+
+type Transfer @entity {
+  id: ID!
+  from: Account!
+  to: Account!
+  value: BigInt!
+  fee: BigInt!
+  timestamp: BigInt!
+  date: String! # yyyy-MM-dd format
+  block: BigInt!
   transactionHash: Bytes!
 }
 
-type Redeem @entity(immutable: true) {
-  id: Bytes!
-  amount: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
+type Approval @entity {
+  id: ID!
+  owner: Account!
+  spender: Account!
+  value: BigInt!
+  timestamp: BigInt!
+  block: BigInt!
   transactionHash: Bytes!
 }
 
-type Deprecate @entity(immutable: true) {
-  id: Bytes!
-  newAddress: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
+type BlacklistAction @entity {
+  id: ID!
+  user: Account!
+  actionType: String! # "ADD" or "REMOVE"
+  timestamp: BigInt!
+  block: BigInt!
   transactionHash: Bytes!
 }
 
-type Params @entity(immutable: true) {
-  id: Bytes!
-  feeBasisPoints: BigInt! # uint256
-  maxFee: BigInt! # uint256
+type ParamChange @entity {
+  id: ID!
+  token: Token!
+  timestamp: BigInt!
   blockNumber: BigInt!
-  blockTimestamp: BigInt!
+  oldBasisPoints: Int!
+  newBasisPoints: Int!
+  oldMaxFee: BigInt!
+  newMaxFee: BigInt!
   transactionHash: Bytes!
 }
 
-type DestroyedBlackFunds @entity(immutable: true) {
-  id: Bytes!
-  _blackListedUser: Bytes! # address
-  _balance: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type DailyMetric @entity {
+  id: ID! # yyyy-MM-dd format
+  timestamp: BigInt!
+  totalTransfers: BigInt!
+  totalTransferValue: BigInt!
+  totalFees: BigInt!
+  uniqueSenders: BigInt!
+  uniqueReceivers: BigInt!
+  activeAccounts: BigInt!
+  averageTransferAmount: BigDecimal!
+  maxTransferAmount: BigInt!
+  minTransferAmount: BigInt!
+  newAccounts: BigInt!
+  blacklistedAccounts: BigInt!
+  hasFeeIncrease: Boolean!
+  hasFeeDecrease: Boolean!
+  volume: BigInt! # Alias for totalTransferValue
+  fee: BigInt! # Alias for totalFees
+  transferCount: BigInt! # Alias for totalTransfers
 }
 
-type AddedBlackList @entity(immutable: true) {
-  id: Bytes!
-  _user: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type UserDailyMetric @entity {
+  id: ID! # user-yyyy-MM-dd format
+  user: Account!
+  timestamp: BigInt!
+  date: String! # yyyy-MM-dd format
+  transferCount: BigInt!
+  receivedCount: BigInt!
+  totalTransferred: BigInt!
+  totalReceived: BigInt!
+  feesPaid: BigInt!
+  endDayBalance: BigInt!
+  averageTransferAmount: BigDecimal!
+  maxTransferAmount: BigInt!
+  distinctReceivers: BigInt!
+  distinctSenders: BigInt!
 }
 
-type RemovedBlackList @entity(immutable: true) {
-  id: Bytes!
-  _user: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Approval @entity(immutable: true) {
-  id: Bytes!
-  owner: Bytes! # address
-  spender: Bytes! # address
-  value: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Transfer @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  value: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Pause @entity(immutable: true) {
-  id: Bytes!
-
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Unpause @entity(immutable: true) {
-  id: Bytes!
-
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+type WeeklyMetric @entity {
+  id: ID! # yyyy-ww format
+  weekNumber: BigInt!
+  year: BigInt!
+  timestamp: BigInt!
+  totalTransfers: BigInt!
+  totalTransferValue: BigInt!
+  totalFees: BigInt!
+  activeAccounts: BigInt!
+  averageTransferAmount: BigDecimal!
+  volume: BigInt! # Alias for totalTransferValue
+  fee: BigInt! # Alias for totalFees
+  transferCount: BigInt! # Alias for totalTransfers
 }

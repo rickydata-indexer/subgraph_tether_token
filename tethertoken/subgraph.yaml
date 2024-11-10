@@ -1,6 +1,4 @@
-specVersion: 1.0.0
-indexerHints:
-  prune: auto
+specVersion: 1.2.0
 schema:
   file: ./schema.graphql
 dataSources:
@@ -16,41 +14,30 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - Issue
-        - Redeem
-        - Deprecate
-        - Params
-        - DestroyedBlackFunds
-        - AddedBlackList
-        - RemovedBlackList
-        - Approval
+        - Token
+        - Account
         - Transfer
-        - Pause
-        - Unpause
+        - Approval
+        - BlacklistAction
+        - TokenIssuance
+        - TokenRedemption
+        - DailyMetric
       abis:
         - name: TetherToken
           file: ./abis/TetherToken.json
       eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
         - event: Issue(uint256)
           handler: handleIssue
         - event: Redeem(uint256)
           handler: handleRedeem
-        - event: Deprecate(address)
-          handler: handleDeprecate
-        - event: Params(uint256,uint256)
-          handler: handleParams
-        - event: DestroyedBlackFunds(address,uint256)
-          handler: handleDestroyedBlackFunds
         - event: AddedBlackList(address)
           handler: handleAddedBlackList
         - event: RemovedBlackList(address)
           handler: handleRemovedBlackList
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-        - event: Pause()
-          handler: handlePause
-        - event: Unpause()
-          handler: handleUnpause
-      file: ./src/tether-token.ts
+        - event: Params(uint256,uint256)
+          handler: handleParams
+      file: ./src/mapping.ts
